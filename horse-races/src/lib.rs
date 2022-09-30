@@ -268,7 +268,6 @@ impl HorseRaces {
     ///
     /// - Checks, that provided `Run` is in canceled stage.
     pub async fn withdraw_canceled(&mut self, run_id: u128) {
-        self.assert_not_manager();
         self.assert_canceled(run_id);
 
         let run = self.runs.get_mut(&run_id).expect("Run is not found!");
@@ -303,7 +302,6 @@ impl HorseRaces {
     ///
     /// - Checks, that provided `Run` is in finished stage.
     pub async fn withdraw_finished(&mut self, run_id: u128) {
-        self.assert_not_manager();
         self.assert_finished(run_id);
 
         let run = self.runs.get_mut(&run_id).expect("Run is not found!");

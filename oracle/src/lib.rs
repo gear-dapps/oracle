@@ -36,6 +36,7 @@ impl Oracle {
         }
 
         // Emit request with id from queue
+        // TODO: Check events with backend
         msg::reply(
             Event::NewUpdateRequest {
                 id,
@@ -43,23 +44,19 @@ impl Oracle {
             },
             0,
         )
-        .unwrap();
+        .expect("Unable to reply!");
     }
 
     pub fn change_manager(&mut self, new_manager: ActorId) {
-        if msg::source() != self.owner {
-            panic!("Only owner allowed to call this function!");
-        }
+        self.assert_only_owner();
 
         self.manager = new_manager;
 
-        msg::reply(Event::NewManager(new_manager), 0).unwrap();
+        msg::reply(Event::NewManager(new_manager), 0).expect("Unable to reply!");
     }
 
     pub async fn update_value(&mut self, id: u128, value: u128) {
-        if msg::source() != self.manager {
-            panic!("Only manager allowed to call this function!");
-        }
+        self.assert_only_manager();
 
         let callback_program = *self
             .requests_queue
@@ -71,9 +68,19 @@ impl Oracle {
         }
 
         // Callback program with value
-        let _callback_result = msg::send_for_reply(callback_program, (id, value).encode(), 0)
-            .expect("Unable to send async callback!")
-            .await;
+        msg::send(callback_program, (id, value.encode()), 0).expect("Unable to send callback!");
+    }
+
+    pub fn assert_only_owner(&self) {
+        if msg::source() != self.owner {
+            panic!("Only owner allowed to call this function!");
+        }
+    }
+
+    pub fn assert_only_manager(&self) {
+        if msg::source() != self.manager {
+            panic!("Only manager allowed to call this function!");
+        }
     }
 }
 

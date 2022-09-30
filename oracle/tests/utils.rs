@@ -7,8 +7,8 @@ pub const USER: u64 = 6;
 pub const FAKE_OWNER: u64 = 7;
 pub const FAKE_MANAGER: u64 = 8;
 
-pub fn load_program<'a>(sys: &'a System) -> Program<'a> {
+pub fn load_program(sys: &System) -> Program<'_> {
     sys.init_logger();
 
-    Program::current(&sys)
+    Program::current(sys)
 }

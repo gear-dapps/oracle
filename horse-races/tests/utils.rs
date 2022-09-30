@@ -16,17 +16,17 @@ pub const USER_1: u64 = 12;
 pub const USER_2: u64 = 13;
 pub const USER_3: u64 = 14;
 
-pub fn get_programs<'a>(sys: &'a System) -> (Program<'a>, Program<'a>, Program<'a>) {
+pub fn get_programs(sys: &System) -> (Program<'_>, Program<'_>, Program<'_>) {
     sys.init_logger();
 
-    let current_program = Program::current_with_id(&sys, HORSE_RACES_ID);
+    let current_program = Program::current_with_id(sys, HORSE_RACES_ID);
     let oracle_program = Program::from_file_with_id(
-        &sys,
+        sys,
         ORACLE_ID,
         "../target/wasm32-unknown-unknown/release/oracle.wasm",
     );
     let token_program =
-        Program::from_file_with_id(&sys, TOKEN_ID, "tests/fixtures/fungible_token.wasm");
+        Program::from_file_with_id(sys, TOKEN_ID, "tests/fixtures/fungible_token.wasm");
 
     (current_program, oracle_program, token_program)
 }

@@ -1,7 +1,7 @@
 use codec::{Decode, Encode};
 use gstd::{prelude::*, TypeInfo};
 
-#[derive(Debug, Clone, Encode, Decode, TypeInfo, Hash)]
+#[derive(Debug, Clone, PartialEq, Eq, Encode, Decode, TypeInfo, Hash)]
 pub enum RunStatus {
     /// Indicates that `Run` is in bidding stage.
     Created,

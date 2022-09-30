@@ -562,11 +562,3 @@ unsafe extern "C" fn meta_state() -> *mut [i32; 2] {
 
     gstd::util::to_leak_ptr(encoded)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {}
-}

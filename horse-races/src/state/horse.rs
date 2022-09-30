@@ -1,7 +1,7 @@
 use codec::{Decode, Encode};
 use gstd::{prelude::*, TypeInfo};
 
-#[derive(Debug, Clone, Hash, Encode, Decode, TypeInfo)]
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Encode, Decode, TypeInfo)]
 pub struct Horse {
     pub max_speed: u8,
 }

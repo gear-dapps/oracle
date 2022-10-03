@@ -4,6 +4,18 @@
 use codec::{Decode, Encode};
 use gstd::{msg, prelude::*, ActorId, TypeInfo};
 
+gstd::metadata! {
+    title: "RollDice",
+    init:
+        input: InitConfig,
+    handle:
+        input: Action,
+        output: Event,
+    state:
+        input: StateQuery,
+        output: StateResponse,
+}
+
 #[derive(Debug, Encode, Decode, TypeInfo)]
 pub enum Action {
     Roll,

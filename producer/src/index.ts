@@ -122,42 +122,21 @@ const main = async () => {
   );
 
   // 3. Listen for new oracle requests
-  gearApi.gearEvents.subscribeToGearEvent(
-    "UserMessageSent",
-    ({
-      data: {
-        message: { source, destination, payload },
-      },
-    }) => {
-      if (source.toString() !== ORACLE_ADDRESS) {
-        return;
-      }
+  gearApi.blocks.subscribeNewHeads(async () => {
+    const oracleQueueItems = await getOracleRequestsQueue(gearApi);
+    if (oracleQueueItems.length !== 0) {
+      console.log(`[+] New request(s): ${JSON.stringify(oracleQueueItems)}`);
 
-      const payloadType = payload.slice(0, 1);
-
-      if (parseInt(payloadType[0].toString()) === 0) {
-        const payloadId = payload.slice(1, 17);
-        const buffer = Buffer.from(
-          payloadId.map((value) => parseInt(value.toString()))
-        );
-        const id = parseInt(buffer.readBigUInt64LE(0).toString());
-
-        const payloadCaller = payload.slice(17);
-        const caller = payloadCaller.map((value) => parseInt(value.toString()));
-
-        console.log(`[+] New request!`);
-        console.log(`\tFrom: ${source}`);
-        console.log(`\tTo: ${destination}`);
-        console.log(`\tID: ${id}`);
-        console.log(`\tCaller: ${caller}`);
-
-        updateOracleValue(gearApi, {
-          id,
-          value: getRandomNumber(9999999999999),
-        });
-      }
+      Promise.all(
+        oracleQueueItems.map((item) =>
+          updateOracleValue(gearApi, {
+            id: item.id,
+            value: getRandomNumber(9999999999999),
+          })
+        )
+      );
     }
-  );
+  });
 };
 
 main();

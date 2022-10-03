@@ -4,18 +4,23 @@ import {
   getWasmMetadata,
   CreateType,
   decodeAddress,
+  Hex,
 } from "@gear-js/api";
+import * as dotenv from "dotenv";
 import { readFileSync } from "fs";
 import { OracleQueueItem, OracleUpdateValue } from "./types";
+import { getRandomNumber } from "./utils";
 
-const ENDPOINT_URL = "";
+dotenv.config();
 
-const ORACLE_ADDRESS = "0x";
-const ORACLE_META_WASM_PATH = "";
+const ENDPOINT_URL = process.env.ENDPOINT_URL || "";
+
+const ORACLE_ADDRESS: Hex = (process.env.ORACLE_ADDRESS as Hex) || "0x";
+const ORACLE_META_WASM_PATH = process.env.ORACLE_META_WASM_PATH || "";
 const ORACLE_META_WASM_BUFFER = readFileSync(ORACLE_META_WASM_PATH);
 
-const KEYRING_PATH = "";
-const KEYRING_PASSPHRASE = "";
+const KEYRING_PATH = process.env.KEYRING_PATH || "";
+const KEYRING_PASSPHRASE = process.env.KEYRING_PASSPHRASE || "";
 const KEYRING = GearKeyring.fromJson(
   readFileSync(KEYRING_PATH).toString(),
   KEYRING_PASSPHRASE
@@ -91,9 +96,6 @@ const updateOracleValue = async (gearApi: GearApi, item: OracleUpdateValue) => {
     console.log(`[-] Failed to send tx`);
   }
 };
-
-const getRandomNumber = (max: number): number =>
-  Math.floor(Math.random() * max);
 
 const main = async () => {
   // 1. Connect to node

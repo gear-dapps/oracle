@@ -21,6 +21,7 @@
   "dependencies": {
     "@gear-js/api": "^0.25.7",
     "@polkadot/api": "^9.4.1",
-    "@polkadot/api-augment": "^9.4.1"
+    "@polkadot/api-augment": "^9.4.1",
+    "dotenv": "^16.0.3"
   }
 }

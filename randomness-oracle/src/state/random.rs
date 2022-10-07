@@ -7,6 +7,6 @@ pub type RandomSeed = (u128, u128);
 #[derive(Debug, Clone, Encode, Decode, TypeInfo)]
 pub struct Random {
     pub randomness: RandomSeed,
-    pub signature: Vec<u8>,
-    pub prev_signature: Vec<u8>,
+    pub signature: String,
+    pub prev_signature: String,
 }

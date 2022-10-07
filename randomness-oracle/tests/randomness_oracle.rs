@@ -76,8 +76,8 @@ fn success_set_random_value() {
 
     let value = Random {
         randomness: (1337, 133700000000001337),
-        signature: Vec::new(),
-        prev_signature: Vec::new(),
+        signature: String::from(""),
+        prev_signature: String::from(""),
     };
 
     let result = oracle_program.send(
@@ -104,8 +104,8 @@ fn fail_set_random_value_invalid_manager() {
 
     let value = Random {
         randomness: (0, 0),
-        signature: Vec::new(),
-        prev_signature: Vec::new(),
+        signature: String::from(""),
+        prev_signature: String::from(""),
     };
 
     let result = oracle_program.send(FAKE_MANAGER, Action::SetRandomValue { round: 1, value });
@@ -126,8 +126,8 @@ fn fail_set_random_value_invalid_round() {
 
     let value = Random {
         randomness: (0, 0),
-        signature: Vec::new(),
-        prev_signature: Vec::new(),
+        signature: String::from(""),
+        prev_signature: String::from(""),
     };
 
     let result = oracle_program.send(

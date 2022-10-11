@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "oracle",
+    "randomness-oracle",
     "io",
     "roll-dice-example",
     "horse-races"

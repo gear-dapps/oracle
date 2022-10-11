@@ -18,33 +18,18 @@ gstd::metadata! {
 
 #[derive(Debug, Default)]
 pub struct Oracle {
-    pub requests_queue: BTreeMap<u128, ActorId>,
     pub owner: ActorId,
     pub manager: ActorId,
-    pub id_nonce: u128,
 }
 
 impl Oracle {
-    pub fn request_value(&mut self) {
-        self.id_nonce = self.id_nonce.checked_add(1).expect("Math overflow!");
-        let id = self.id_nonce;
+    pub async fn request_value(&mut self) {
+        let value = msg::send_for_reply_as(self.manager, 0i32, 0)
+            .expect("Can't send message for update value")
+            .await
+            .expect("Can't obtain updated value");
 
-        let program = msg::source();
-
-        if self.requests_queue.insert(id, program).is_some() {
-            panic!("Invalid queue nonce!");
-        }
-
-        // Emit request with id from queue
-        // TODO: Check events with backend
-        msg::reply(
-            Event::NewUpdateRequest {
-                id,
-                caller: program,
-            },
-            0,
-        )
-        .expect("Unable to reply!");
+        msg::reply(Event::NewValue { value }, 0).expect("Unable to reply!");
     }
 
     pub fn change_manager(&mut self, new_manager: ActorId) {
@@ -55,32 +40,9 @@ impl Oracle {
         msg::reply(Event::NewManager(new_manager), 0).expect("Unable to reply!");
     }
 
-    pub async fn update_value(&mut self, id: u128, value: u128) {
-        self.assert_only_manager();
-
-        let callback_program = *self
-            .requests_queue
-            .get(&id)
-            .expect("Provided ID not found in requests queue!");
-
-        if self.requests_queue.remove(&id).is_none() {
-            panic!("Provided ID not found in requests queue!");
-        }
-
-        // Callback program with value
-        msg::send(callback_program, (id, value).encode(), 0)
-            .expect("Unable to send async callback!");
-    }
-
     pub fn assert_only_owner(&self) {
         if msg::source() != self.owner {
             panic!("Only owner allowed to call this function!");
-        }
-    }
-
-    pub fn assert_only_manager(&self) {
-        if msg::source() != self.manager {
-            panic!("Only manager allowed to call this function!");
         }
     }
 }
@@ -93,9 +55,8 @@ async fn main() {
     let oracle: &mut Oracle = unsafe { ORACLE.get_or_insert(Oracle::default()) };
 
     match action {
-        Action::RequestValue => oracle.request_value(),
+        Action::RequestValue => oracle.request_value().await,
         Action::ChangeManager(new_manager) => oracle.change_manager(new_manager),
-        Action::UpdateValue { id, value } => oracle.update_value(id, value).await,
     }
 }
 
@@ -105,7 +66,6 @@ unsafe extern "C" fn init() {
     let oracle = Oracle {
         owner: config.owner,
         manager: config.manager,
-        ..Default::default()
     };
 
     ORACLE = Some(oracle);
@@ -119,14 +79,6 @@ unsafe extern "C" fn meta_state() -> *mut [i32; 2] {
     let encoded = match state_query {
         StateQuery::GetOwner => StateResponse::Owner(oracle.owner),
         StateQuery::GetManager => StateResponse::Manager(oracle.manager),
-        StateQuery::GetRequestsQueue => StateResponse::RequestsQueue(
-            oracle
-                .requests_queue
-                .iter()
-                .map(|(id, callback_program)| (*id, *callback_program))
-                .collect::<Vec<(u128, ActorId)>>(),
-        ),
-        StateQuery::GetIdNonce => StateResponse::IdNonce(oracle.id_nonce),
     }
     .encode();
 

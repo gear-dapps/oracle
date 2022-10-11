@@ -14,12 +14,11 @@ pub struct InitConfig {
 pub enum Action {
     RequestValue,
     ChangeManager(ActorId),
-    UpdateValue { id: u128, value: u128 },
 }
 
 #[derive(Debug, Encode, Decode, TypeInfo)]
 pub enum Event {
-    NewUpdateRequest { id: u128, caller: ActorId },
+    NewValue { value: u128 },
     NewManager(ActorId),
 }
 
@@ -27,14 +26,10 @@ pub enum Event {
 pub enum StateQuery {
     GetOwner,
     GetManager,
-    GetRequestsQueue,
-    GetIdNonce,
 }
 
 #[derive(Debug, Encode, Decode, TypeInfo)]
 pub enum StateResponse {
     Owner(ActorId),
     Manager(ActorId),
-    RequestsQueue(Vec<(u128, ActorId)>),
-    IdNonce(u128),
 }

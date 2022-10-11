@@ -20,6 +20,7 @@
     "@gear-js/api": "^0.25.9",
     "@polkadot/api": "^9.4.3",
     "@polkadot/api-augment": "^9.4.3",
+    "@polkadot/keyring": "^10.1.10",
     "dotenv": "^16.0.3",
     "isomorphic-unfetch": "^3.1.0"
   }

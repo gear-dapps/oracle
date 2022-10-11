@@ -112,7 +112,7 @@
     eventemitter3 "^4.0.7"
     rxjs "^7.5.7"
 
-"@polkadot/keyring@^10.1.9":
+"@polkadot/keyring@^10.1.10", "@polkadot/keyring@^10.1.9":
   version "10.1.10"
   resolved "https://registry.yarnpkg.com/@polkadot/keyring/-/keyring-10.1.10.tgz#f9d97ab528e612df4820e0df1837faae51c15904"
   integrity sha512-crKYBbwmPcFoTP6mby2+o1QWsjAyi5QlKzU8tXuXOApP6SBuqmDujIuLOKNG2vZoftNdVldsVL0WmKVYtBeuQg==

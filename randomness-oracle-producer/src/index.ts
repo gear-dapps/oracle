@@ -5,7 +5,9 @@ import {
   CreateType,
   decodeAddress,
   Hex,
+  Metadata,
 } from "@gear-js/api";
+import { KeyringPair } from "@polkadot/keyring/types";
 import * as dotenv from "dotenv";
 import { readFileSync } from "fs";
 import { Random } from "./types";
@@ -19,19 +21,39 @@ const ORACLE_ADDRESS: Hex = (process.env.ORACLE_ADDRESS as Hex) || "0x";
 const ORACLE_META_WASM_PATH = process.env.ORACLE_META_WASM_PATH || "";
 const ORACLE_META_WASM_BUFFER = readFileSync(ORACLE_META_WASM_PATH);
 
-const KEYRING_PATH = process.env.KEYRING_PATH || "";
-const KEYRING_PASSPHRASE = process.env.KEYRING_PASSPHRASE || "";
-const KEYRING = GearKeyring.fromJson(
-  readFileSync(KEYRING_PATH).toString(),
-  KEYRING_PASSPHRASE
-);
+const KEYRING_PASSPHRASE = process.env.KEYRING_PASSPHRASE;
+const KEYRING_PATH = process.env.KEYRING_PATH;
+const KEYRING_MNEMONIC = process.env.KEYRING_MNEMONIC;
+const KEYRING_SEED = process.env.KEYRING_SEED;
 
-const updateOracleValue = async (data: [number, Random], gearApi: GearApi) => {
+const getKeyring = async (): Promise<KeyringPair | undefined> => {
+  if (KEYRING_MNEMONIC !== undefined) {
+    return await GearKeyring.fromMnemonic(KEYRING_MNEMONIC);
+  }
+
+  if (KEYRING_SEED !== undefined) {
+    return await GearKeyring.fromSeed(KEYRING_SEED);
+  }
+
+  if (KEYRING_PATH !== undefined && KEYRING_PASSPHRASE !== undefined) {
+    return GearKeyring.fromJson(
+      readFileSync(KEYRING_PATH).toString(),
+      KEYRING_PASSPHRASE
+    );
+  }
+
+  return undefined;
+};
+
+const updateOracleValue = async (
+  gearApi: GearApi,
+  oracleMeta: Metadata,
+  keyring: KeyringPair,
+  data: [number, Random]
+) => {
   const [round, random] = data;
 
   try {
-    const oracleMeta = await getWasmMetadata(ORACLE_META_WASM_BUFFER);
-
     const payload = CreateType.create(
       "Action",
       {
@@ -48,7 +70,7 @@ const updateOracleValue = async (data: [number, Random], gearApi: GearApi) => {
     );
 
     const gas = await gearApi.program.calculateGas.handle(
-      decodeAddress(KEYRING.address),
+      decodeAddress(keyring.address),
       ORACLE_ADDRESS,
       payload.toHex(),
       0,
@@ -56,18 +78,14 @@ const updateOracleValue = async (data: [number, Random], gearApi: GearApi) => {
       oracleMeta
     );
 
-    let extrinsic = gearApi.message.send(
-      {
-        destination: ORACLE_ADDRESS,
-        payload: payload.toHex(),
-        gasLimit: gas.min_limit,
-        value: 0,
-      },
-      undefined,
-      "String"
-    );
+    let extrinsic = gearApi.message.send({
+      destination: ORACLE_ADDRESS,
+      payload: payload.toHex(),
+      gasLimit: gas.min_limit,
+      value: 0,
+    });
 
-    await extrinsic.signAndSend(KEYRING, (event: any) => {
+    await extrinsic.signAndSend(keyring, (event: any) => {
       if (event.isError) {
         throw new Error("Can't send tx");
       } else {
@@ -89,12 +107,22 @@ const main = async () => {
     `[+] Started with: ${await gearApi.nodeName()}-${await gearApi.nodeVersion()}`
   );
 
-  // 2. Feed oracle via external API
+  // 2. Load oracle wasm metadata
+  const oracleMeta = await getWasmMetadata(ORACLE_META_WASM_BUFFER);
+
+  // 3. Load Keyring from one of provided methods
+  const keyring = await getKeyring();
+  if (keyring === undefined) {
+    console.log("[-] Unable to load keypair by provided methods");
+    return;
+  }
+
+  // 4. Feed oracle via external API
   setInterval(async () => {
     const data = await fetchRandomValue();
     console.log(`New tick: ${data[0]}`);
 
-    await updateOracleValue(data, gearApi);
+    await updateOracleValue(gearApi, oracleMeta, keyring, data);
   }, 30000);
 };
 

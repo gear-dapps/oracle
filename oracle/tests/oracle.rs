@@ -1,9 +1,15 @@
 mod utils;
 
 use codec::Encode;
+use gstd::MessageId;
 use gtest::{Log, System};
 use oracle_io::*;
 use utils::*;
+
+// use gear_core::{
+//     ids::{MessageId, ProgramId},
+//     message::{Dispatch, DispatchKind, Message, ReplyDetails, StoredMessage},
+// };
 
 #[test]
 fn success_init() {
@@ -71,22 +77,19 @@ fn success_request_value() {
     sys.spend_blocks(10);
 
     let result = oracle_program.send(USER, Action::RequestValue);
-    assert!(!result.log().is_empty());
-    assert!(!result.main_failed());
-    assert!(!result.others_failed());
-
-    sys.spend_blocks(10);
 
     let mailbox = sys.get_mailbox(MANAGER);
-    let msg_replier = mailbox.take_message(
-        Log::builder()
-            .source(oracle_program.id())
-            .dest(MANAGER)
-            .payload(0i32),
-    );
-    let result = msg_replier.reply(1337u128, 0);
-    assert!(!result.main_failed());
-    assert!(!result.others_failed());
+    let message_log = Log::builder()
+        .source(oracle_program.id())
+        .dest(MANAGER)
+        .payload(0i32);
+    mailbox.reply(message_log.clone(), 0i32, 0);
+   
+    let user_mailbox = sys.get_mailbox(USER);
+
+    let message = Log::builder().source(oracle_program.id()).dest(USER);
+    //  .payload(Event::NewValue { value: 1337u128 });
+    assert!(user_mailbox.contains(&message));
 }
 
 #[test]

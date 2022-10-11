@@ -1,7 +1,7 @@
 #![no_std]
 #![allow(clippy::missing_safety_doc)]
 
-use gstd::{async_main, msg, prelude::*, ActorId};
+use gstd::{async_main, debug, msg, prelude::*, ActorId};
 use oracle_io::{Action, Event, InitConfig, StateQuery, StateResponse};
 
 gstd::metadata! {
@@ -24,11 +24,12 @@ pub struct Oracle {
 
 impl Oracle {
     pub async fn request_value(&mut self) {
+        debug!("Before sending message to manager");
         let value = msg::send_for_reply_as(self.manager, 0i32, 0)
             .expect("Can't send message for update value")
             .await
             .expect("Can't obtain updated value");
-
+        debug!("After sending message to manager");
         msg::reply(Event::NewValue { value }, 0).expect("Unable to reply!");
     }
 

@@ -1,4 +1,4 @@
-/* mod utils;
+mod utils;
 
 use codec::Encode;
 use gtest::{Log, System};
@@ -87,39 +87,6 @@ fn success_request_value() {
     let result = msg_replier.reply(1337u128, 0);
     assert!(!result.main_failed());
     assert!(!result.others_failed());
-
-    let mailbox = sys.get_mailbox(USER);
-    assert!(mailbox.contains(&(
-        oracle_program.id(),
-        Event::NewValue {
-            value: 1337_i32.to_le_bytes().to_vec()
-        }
-        .encode()
-    )));
-    assert!(!result.main_failed());
-    assert!(!result.others_failed());
-
-    let mailbox = sys.get_mailbox(USER);
-    assert!(mailbox.contains(&(
-        oracle_program.id(),
-        Event::NewValue {
-            value: 1337i32.to_le_bytes().to_vec()
-        }
-        .encode()
-    )));
-
-    let result = mailbox.take_message(*result.log().last().unwrap());
-    assert!(!result.main_failed());
-    assert!(!result.others_failed());
-
-    assert!(result.contains(&(
-        USER,
-        Event::NewUpdateRequest {
-            id: 1,
-            caller: USER.into()
-        }
-        .encode()
-    )));
 }
 
 #[test]
@@ -135,7 +102,6 @@ fn fail_change_manager_invalid_owner() {
         },
     );
 
-    let result = oracle_program.send(FAKE_OWNER, Action::ChangeManager(MANAGER.into()));
+    let result = oracle_program.send(FAKE_OWNER, Action::ChangeManager(FAKE_MANAGER.into()));
     assert!(result.main_failed());
 }
- */

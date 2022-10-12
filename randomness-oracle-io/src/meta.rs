@@ -3,7 +3,7 @@ use codec::{Decode, Encode};
 use gstd::{prelude::*, ActorId, TypeInfo};
 
 #[derive(Debug, Encode, Decode, TypeInfo)]
-pub enum StateQuery {
+pub enum MetaQuery {
     GetOwner,
     GetManager,
     GetValues,
@@ -14,7 +14,7 @@ pub enum StateQuery {
 }
 
 #[derive(Debug, Encode, Decode, TypeInfo)]
-pub enum StateResponse {
+pub enum MetaResponse {
     Owner(ActorId),
     Manager(ActorId),
     Values(Vec<(u128, state::Random)>),

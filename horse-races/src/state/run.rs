@@ -13,8 +13,8 @@ pub struct Run {
 }
 
 impl Run {
-    pub fn progress(&mut self) {
-        self.status = RunStatus::InProgress;
+    pub fn progress(&mut self, oracle_round: u128) {
+        self.status = RunStatus::InProgress { oracle_round };
     }
 
     pub fn cancel(&mut self) {

@@ -1,3 +1,5 @@
+extern crate std;
+
 use codec::Encode;
 use gtest::{Program, System};
 
@@ -23,7 +25,7 @@ pub fn get_programs(sys: &System) -> (Program<'_>, Program<'_>, Program<'_>) {
     let oracle_program = Program::from_file_with_id(
         sys,
         ORACLE_ID,
-        "../target/wasm32-unknown-unknown/release/oracle.wasm",
+        "../target/wasm32-unknown-unknown/release/randomness_oracle.wasm",
     );
     let token_program =
         Program::from_file_with_id(sys, TOKEN_ID, "tests/fixtures/fungible_token.wasm");
@@ -34,12 +36,25 @@ pub fn get_programs(sys: &System) -> (Program<'_>, Program<'_>, Program<'_>) {
 pub fn init_oracle<'a>(oracle_program: &'a Program<'a>) {
     let result = oracle_program.send(
         OWNER,
-        oracle_io::InitConfig {
+        randomness_oracle_io::InitConfig {
             manager: MANAGER.into(),
-            owner: OWNER.into(),
         },
     );
     assert!(result.log().is_empty());
+}
+
+pub fn set_oracle_value<'a>(oracle_program: &'a Program<'a>, round: u128, value: u128) {
+    let _ = oracle_program.send(
+        MANAGER,
+        randomness_oracle_io::Action::SetRandomValue {
+            round,
+            value: randomness_oracle_io::state::Random {
+                randomness: (value, 0),
+                signature: String::from("signature"),
+                prev_signature: String::from("prev_signature"),
+            },
+        },
+    );
 }
 
 pub fn init_token<'a>(token_program: &'a Program<'a>) {
@@ -51,7 +66,8 @@ pub fn init_token<'a>(token_program: &'a Program<'a>) {
             decimals: 18,
         },
     );
-    assert!(result.log().is_empty());
+
+    assert!(!result.main_failed());
 }
 
 pub fn mint_token<'a>(token_program: &'a Program<'a>, user: u64, amount: u128) {
@@ -67,8 +83,10 @@ pub fn mint_token<'a>(token_program: &'a Program<'a>, user: u64, amount: u128) {
         },
     );
     assert!(!result.main_failed());
+    assert!(!result.others_failed());
 
     let result = token_program.send(OWNER, ft_io::FTAction::BalanceOf(user.into()));
+
     assert!(!result.main_failed());
     assert!(result.contains(&(OWNER, ft_io::FTEvent::Balance(amount).encode())));
 }

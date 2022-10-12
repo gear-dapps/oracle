@@ -3,7 +3,7 @@ use codec::{Decode, Encode};
 use gstd::{prelude::*, ActorId, TypeInfo};
 
 #[derive(Debug, Encode, Decode, TypeInfo)]
-pub enum StateQuery {
+pub enum MetaQuery {
     GetRuns,
     GetHorses(u128),
     GetManager,
@@ -16,7 +16,7 @@ pub enum StateQuery {
 }
 
 #[derive(Debug, Encode, Decode, TypeInfo)]
-pub enum StateResponse {
+pub enum MetaResponse {
     Runs(Vec<(u128, Run)>),
     Horses(Vec<(String, Horse, u128)>),
     Manager(ActorId),

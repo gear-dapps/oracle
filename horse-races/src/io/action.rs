@@ -13,6 +13,7 @@ pub enum Action {
         bidding_duration_ms: u64,
         horses: BTreeMap<String, Horse>,
     },
+    FinishLastRun,
     Bid {
         horse_name: String,
         amount: u128,

@@ -2,7 +2,7 @@ mod utils;
 
 use codec::Encode;
 use gtest::System;
-use randomness_oracle::{io::*, state::*};
+use randomness_oracle_io::{state::*, *};
 use utils::*;
 
 #[test]
@@ -18,28 +18,28 @@ fn success_init() {
     );
     assert!(result.log().is_empty());
 
-    let meta_result: StateResponse = oracle_program.meta_state(StateQuery::GetOwner).unwrap();
+    let meta_result: MetaResponse = oracle_program.meta_state(MetaQuery::GetOwner).unwrap();
     match meta_result {
-        StateResponse::Owner(owner) => assert_eq!(owner, OWNER.into()),
-        _ => panic!("Invalid StateResponse!"),
+        MetaResponse::Owner(owner) => assert_eq!(owner, OWNER.into()),
+        _ => panic!("Invalid MetaResponse!"),
     }
 
-    let meta_result: StateResponse = oracle_program.meta_state(StateQuery::GetManager).unwrap();
+    let meta_result: MetaResponse = oracle_program.meta_state(MetaQuery::GetManager).unwrap();
     match meta_result {
-        StateResponse::Manager(manager) => assert_eq!(manager, MANAGER.into()),
-        _ => panic!("Invalid StateResponse!"),
+        MetaResponse::Manager(manager) => assert_eq!(manager, MANAGER.into()),
+        _ => panic!("Invalid MetaResponse!"),
     }
 
-    let meta_result: StateResponse = oracle_program.meta_state(StateQuery::GetValues).unwrap();
+    let meta_result: MetaResponse = oracle_program.meta_state(MetaQuery::GetValues).unwrap();
     match meta_result {
-        StateResponse::Values(values) => assert!(values.is_empty()),
-        _ => panic!("Invalid StateResponse!"),
+        MetaResponse::Values(values) => assert!(values.is_empty()),
+        _ => panic!("Invalid MetaResponse!"),
     }
 
-    let meta_result: StateResponse = oracle_program.meta_state(StateQuery::GetLastRound).unwrap();
+    let meta_result: MetaResponse = oracle_program.meta_state(MetaQuery::GetLastRound).unwrap();
     match meta_result {
-        StateResponse::LastRound(last_round) => assert_eq!(last_round, 0),
-        _ => panic!("Invalid StateResponse!"),
+        MetaResponse::LastRound(last_round) => assert_eq!(last_round, 0),
+        _ => panic!("Invalid MetaResponse!"),
     }
 }
 

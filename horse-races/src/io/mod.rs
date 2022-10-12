@@ -1,9 +1,9 @@
 mod action;
 mod config;
 mod event;
-mod state;
+mod meta;
 
 pub use action::*;
 pub use config::*;
 pub use event::*;
-pub use state::*;
+pub use meta::*;

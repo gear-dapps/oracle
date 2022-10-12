@@ -301,7 +301,7 @@ dependencies = [
 [[package]]
 name = "galloc"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "dlmalloc",
 ]
@@ -309,16 +309,17 @@ dependencies = [
 [[package]]
 name = "gcore"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "gear-core-errors",
  "parity-scale-codec",
+ "static_assertions",
 ]
 
 [[package]]
 name = "gear-backend-common"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "derive_more",
  "gear-core",
@@ -331,7 +332,7 @@ dependencies = [
 [[package]]
 name = "gear-backend-wasmi"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "derive_more",
  "gear-backend-common",
@@ -346,7 +347,7 @@ dependencies = [
 [[package]]
 name = "gear-core"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "blake2-rfc",
  "derive_more",
@@ -364,7 +365,7 @@ dependencies = [
 [[package]]
 name = "gear-core-errors"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "derive_more",
  "parity-scale-codec",
@@ -374,7 +375,7 @@ dependencies = [
 [[package]]
 name = "gear-core-processor"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "anyhow",
  "blake2-rfc",
@@ -390,7 +391,7 @@ dependencies = [
 [[package]]
 name = "gear-wasm-builder"
 version = "0.1.2"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "anyhow",
  "cargo_metadata",
@@ -406,7 +407,7 @@ dependencies = [
 [[package]]
 name = "gstd"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "bs58",
  "futures",
@@ -418,12 +419,13 @@ dependencies = [
  "parity-scale-codec",
  "primitive-types",
  "scale-info",
+ "static_assertions",
 ]
 
 [[package]]
 name = "gstd-codegen"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -433,7 +435,7 @@ dependencies = [
 [[package]]
 name = "gtest"
 version = "0.1.0"
-source = "git+https://github.com/gear-tech/gear.git#e8af76fd40fb31c3acc7bae3987dd730c5b62eae"
+source = "git+https://github.com/gear-dapps/gear.git?rev=6471eb93#6471eb93ef2a628e51ae29c3f0d60b236defe473"
 dependencies = [
  "anyhow",
  "colored",
@@ -477,7 +479,7 @@ dependencies = [
  "gtest",
  "parity-scale-codec",
  "primitive-types",
- "randomness-oracle",
+ "randomness-oracle-io",
  "scale-info",
 ]
 
@@ -783,6 +785,17 @@ dependencies = [
  "gear-wasm-builder",
  "gstd",
  "gtest",
+ "parity-scale-codec",
+ "primitive-types",
+ "randomness-oracle-io",
+ "scale-info",
+]
+
+[[package]]
+name = "randomness-oracle-io"
+version = "0.1.0"
+dependencies = [
+ "gstd",
  "parity-scale-codec",
  "primitive-types",
  "scale-info",

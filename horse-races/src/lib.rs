@@ -6,7 +6,7 @@ pub mod state;
 pub mod utils;
 
 use gstd::{exec, msg, prelude::*, ActorId};
-use io::{Action, Event, InitConfig, StateQuery, StateResponse};
+use io::{Action, Event, InitConfig, MetaQuery, MetaResponse};
 use state::{Horse, Run, RunStatus};
 use utils::{validate_fee_bps, MAX_BPS};
 
@@ -18,8 +18,8 @@ gstd::metadata! {
         input: Action,
         output: Event,
     state:
-        input: StateQuery,
-        output: StateResponse,
+        input: MetaQuery,
+        output: MetaResponse,
 }
 
 #[derive(Debug, Default)]
@@ -93,15 +93,26 @@ impl HorseRaces {
             .get_mut(&self.run_nonce)
             .expect("Last run is not found!");
 
-        current_run.progress();
+        let oracle_reply: randomness_oracle_io::Event = msg::send_for_reply_as(
+            self.oracle,
+            randomness_oracle_io::Action::GetLastRoundWithRandomValue,
+            0,
+        )
+        .expect("Unable to send oracle action!")
+        .await
+        .expect("Unable to await oracle event!");
 
-        let _oracle_reply: oracle_io::Event =
-            msg::send_for_reply_as(self.oracle, oracle_io::Action::RequestValue, 0)
-                .expect("Unable to request value from oracle!")
-                .await
-                .expect("Unable to decode oracle reply!");
+        if let randomness_oracle_io::Event::LastRoundWithRandomValue {
+            round,
+            random_value: _,
+        } = oracle_reply
+        {
+            current_run.progress(round);
 
-        msg::reply(Event::LastRunProgressed(self.run_nonce), 0).expect("Unable to reply!");
+            msg::reply(Event::LastRunProgressed(self.run_nonce), 0).expect("Unable to reply!");
+        } else {
+            panic!("Invalid oracle reply!");
+        }
     }
 
     /// Change(move) current `Run` `status` to `Canceled`.
@@ -129,26 +140,51 @@ impl HorseRaces {
     /// Picks horse randomly according to stats.
     ///
     /// - Checks that last `Run` is valid.
-    pub fn finish_last_run(&mut self, seed: u128) {
-        self.assert_oracle();
+    pub async fn finish_last_run(&mut self) {
         self.assert_last_run_in_progress();
 
         let run_id = self.run_nonce;
 
         let current_run = self.runs.get_mut(&run_id).expect("Last run is not found!");
+        if let RunStatus::InProgress { oracle_round } = current_run.status {
+            let oracle_reply: randomness_oracle_io::Event = msg::send_for_reply_as(
+                self.oracle,
+                randomness_oracle_io::Action::GetLastRoundWithRandomValue,
+                0,
+            )
+            .expect("Unable to send oracle action!")
+            .await
+            .expect("Unable to await oracle event!");
 
-        current_run.finish(seed, run_id);
+            if let randomness_oracle_io::Event::LastRoundWithRandomValue {
+                round,
+                random_value,
+            } = oracle_reply
+            {
+                if round <= oracle_round {
+                    panic!("Oracle round is not changed!");
+                }
 
-        msg::reply(
-            Event::LastRunFinished {
-                run_id,
-                winner: current_run
-                    .get_winner_horse()
-                    .expect("Winner horse is not found!"),
-            },
-            0,
-        )
-        .expect("Unable to reply!");
+                let seed = random_value.0;
+
+                current_run.finish(seed, run_id);
+
+                msg::reply(
+                    Event::LastRunFinished {
+                        run_id,
+                        winner: current_run
+                            .get_winner_horse()
+                            .expect("Winner horse is not found!"),
+                    },
+                    0,
+                )
+                .expect("Unable to reply!");
+            } else {
+                panic!("Invalid oracle reply!")
+            }
+        } else {
+            panic!("Invalid last run status!");
+        }
     }
 
     /// Creates new run.
@@ -371,12 +407,6 @@ impl HorseRaces {
         }
     }
 
-    fn assert_oracle(&self) {
-        if self.oracle != msg::source() {
-            panic!("Only oracle can call this!");
-        }
-    }
-
     fn assert_last_run_ended(&self) {
         if let Some(last_run) = self.get_last_run() {
             match last_run.status {
@@ -427,7 +457,7 @@ impl HorseRaces {
     fn assert_last_run_in_progress(&self) {
         if let Some(last_run) = self.get_last_run() {
             match last_run.status {
-                RunStatus::InProgress => {}
+                RunStatus::InProgress { oracle_round: _ } => {}
                 _ => panic!("Last run stage is invalid!"),
             }
         } else {
@@ -509,16 +539,6 @@ unsafe extern "C" fn init() {
 async fn main() {
     let horse_races: &mut HorseRaces = unsafe { HORSE_RACES.get_or_insert(HorseRaces::default()) };
 
-    // Handler(proxy) for oracle messages
-    if msg::source() == horse_races.oracle {
-        let payload = msg::load_bytes();
-        let _id: u128 = u128::from_le_bytes(payload[1..17].try_into().unwrap());
-        let seed: u128 = u128::from_le_bytes(payload[17..].try_into().unwrap());
-
-        horse_races.finish_last_run(seed);
-        return;
-    }
-
     let action: Action = msg::load().expect("Unable to decode Action.");
     match action {
         Action::UpdateFeeBps(new_fee_bps) => horse_races.update_fee_bps(new_fee_bps),
@@ -530,6 +550,7 @@ async fn main() {
             bidding_duration_ms,
             horses,
         } => horse_races.create_run(bidding_duration_ms, horses),
+        Action::FinishLastRun => horse_races.finish_last_run().await,
         Action::Bid { horse_name, amount } => horse_races.bid(&horse_name, amount).await,
         Action::WithdrawCanceled(run_id) => horse_races.withdraw_canceled(run_id).await,
         Action::WithdrawFinished(run_id) => horse_races.withdraw_finished(run_id).await,
@@ -538,19 +559,19 @@ async fn main() {
 
 #[no_mangle]
 unsafe extern "C" fn meta_state() -> *mut [i32; 2] {
-    let state_query: StateQuery = msg::load().expect("Unable to decode StateQuery.");
+    let state_query: MetaQuery = msg::load().expect("Unable to decode MetaQuery.");
     let horse_races = HORSE_RACES.get_or_insert(Default::default());
 
     let encoded = match state_query {
-        StateQuery::GetRuns => StateResponse::Runs(horse_races.get_runs()),
-        StateQuery::GetHorses(run_id) => StateResponse::Horses(horse_races.get_horses(run_id)),
-        StateQuery::GetManager => StateResponse::Manager(horse_races.manager),
-        StateQuery::GetOwner => StateResponse::Owner(horse_races.owner),
-        StateQuery::GetToken => StateResponse::Token(horse_races.token),
-        StateQuery::GetOracle => StateResponse::Oracle(horse_races.oracle),
-        StateQuery::GetFeeBps => StateResponse::FeeBps(horse_races.fee_bps),
-        StateQuery::GetRunNonce => StateResponse::RunNonce(horse_races.run_nonce),
-        StateQuery::GetRun(run_id) => StateResponse::Run(
+        MetaQuery::GetRuns => MetaResponse::Runs(horse_races.get_runs()),
+        MetaQuery::GetHorses(run_id) => MetaResponse::Horses(horse_races.get_horses(run_id)),
+        MetaQuery::GetManager => MetaResponse::Manager(horse_races.manager),
+        MetaQuery::GetOwner => MetaResponse::Owner(horse_races.owner),
+        MetaQuery::GetToken => MetaResponse::Token(horse_races.token),
+        MetaQuery::GetOracle => MetaResponse::Oracle(horse_races.oracle),
+        MetaQuery::GetFeeBps => MetaResponse::FeeBps(horse_races.fee_bps),
+        MetaQuery::GetRunNonce => MetaResponse::RunNonce(horse_races.run_nonce),
+        MetaQuery::GetRun(run_id) => MetaResponse::Run(
             horse_races
                 .runs
                 .get(&run_id)

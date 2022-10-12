@@ -10,7 +10,7 @@ pub enum RunStatus {
     Canceled,
 
     /// Indicates that `Run` is in progress.
-    InProgress,
+    InProgress { oracle_round: u128 },
 
     /// Indicates that `Run` is finished.
     Finished { horse_name: String, run_id: u128 },

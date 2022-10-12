@@ -25,57 +25,53 @@ fn success_init() {
     );
     assert!(result.log().is_empty());
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => assert!(runs.is_empty()),
+        MetaResponse::Runs(runs) => assert!(runs.is_empty()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetManager)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetManager)
         .unwrap();
     match meta_state {
-        StateResponse::Manager(manager) => assert_eq!(manager, MANAGER.into()),
+        MetaResponse::Manager(manager) => assert_eq!(manager, MANAGER.into()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetOwner)
-        .unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetOwner).unwrap();
     match meta_state {
-        StateResponse::Owner(owner) => assert_eq!(owner, OWNER.into()),
+        MetaResponse::Owner(owner) => assert_eq!(owner, OWNER.into()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetToken)
-        .unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetToken).unwrap();
     match meta_state {
-        StateResponse::Token(token) => assert_eq!(token, TOKEN_ID.into()),
+        MetaResponse::Token(token) => assert_eq!(token, TOKEN_ID.into()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetOracle)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetOracle)
         .unwrap();
     match meta_state {
-        StateResponse::Oracle(oracle) => assert_eq!(oracle, ORACLE_ID.into()),
+        MetaResponse::Oracle(oracle) => assert_eq!(oracle, ORACLE_ID.into()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetFeeBps)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetFeeBps)
         .unwrap();
     match meta_state {
-        StateResponse::FeeBps(fee_bps) => assert_eq!(fee_bps, FEE_BPS),
+        MetaResponse::FeeBps(fee_bps) => assert_eq!(fee_bps, FEE_BPS),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetRunNonce)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetRunNonce)
         .unwrap();
     match meta_state {
-        StateResponse::RunNonce(run_nonce) => assert_eq!(run_nonce, 0),
+        MetaResponse::RunNonce(run_nonce) => assert_eq!(run_nonce, 0),
         _ => panic!("Invalid meta state!"),
     }
 }
@@ -114,27 +110,27 @@ fn success_update() {
         Event::OracleUpdated(NEW_ORACLE.into()).encode()
     )));
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetManager)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetManager)
         .unwrap();
     match meta_state {
-        StateResponse::Manager(manager) => assert_eq!(manager, NEW_MANAGER.into()),
+        MetaResponse::Manager(manager) => assert_eq!(manager, NEW_MANAGER.into()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetOracle)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetOracle)
         .unwrap();
     match meta_state {
-        StateResponse::Oracle(oracle) => assert_eq!(oracle, NEW_ORACLE.into()),
+        MetaResponse::Oracle(oracle) => assert_eq!(oracle, NEW_ORACLE.into()),
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetFeeBps)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetFeeBps)
         .unwrap();
     match meta_state {
-        StateResponse::FeeBps(fee_bps) => assert_eq!(fee_bps, NEW_FEE_BPS),
+        MetaResponse::FeeBps(fee_bps) => assert_eq!(fee_bps, NEW_FEE_BPS),
         _ => panic!("Invalid meta state!"),
     }
 }
@@ -182,9 +178,9 @@ fn success_create_run() {
         .encode()
     )));
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => {
+        MetaResponse::Runs(runs) => {
             assert!(!runs.is_empty());
 
             let (id, run) = &runs[0];
@@ -210,11 +206,11 @@ fn success_create_run() {
         _ => panic!("Invalid meta state!"),
     }
 
-    let meta_state: StateResponse = horse_races_program
-        .meta_state(StateQuery::GetRunNonce)
+    let meta_state: MetaResponse = horse_races_program
+        .meta_state(MetaQuery::GetRunNonce)
         .unwrap();
     match meta_state {
-        StateResponse::RunNonce(run_nonce) => assert_eq!(run_nonce, 1),
+        MetaResponse::RunNonce(run_nonce) => assert_eq!(run_nonce, 1),
         _ => panic!("Invalid meta state!"),
     }
 }
@@ -275,9 +271,9 @@ fn success_bid() {
         .encode()
     )));
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => {
+        MetaResponse::Runs(runs) => {
             assert!(!runs.is_empty());
 
             let (id, run) = &runs[0];
@@ -358,9 +354,9 @@ fn success_cancel_last_run() {
     assert!(!result.main_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunCanceled(1).encode())));
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => {
+        MetaResponse::Runs(runs) => {
             assert!(!runs.is_empty());
 
             let (id, run) = &runs[0];
@@ -411,6 +407,8 @@ fn success_progress_last_run() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         USER,
         Action::Bid {
@@ -420,6 +418,8 @@ fn success_progress_last_run() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 2, 2141258129341892512471);
+
     sys.spend_blocks(1);
 
     let result = horse_races_program.send(MANAGER, Action::ProgressLastRun);
@@ -427,15 +427,15 @@ fn success_progress_last_run() {
     assert!(!result.others_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunProgressed(1).encode())));
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => {
+        MetaResponse::Runs(runs) => {
             assert!(!runs.is_empty());
 
             let (id, run) = &runs[0];
 
             assert_eq!(*id, 1);
-            assert_eq!(run.status, RunStatus::InProgress);
+            assert_eq!(run.status, RunStatus::InProgress { oracle_round: 2 });
         }
         _ => panic!("Invalid meta state!"),
     }
@@ -447,7 +447,7 @@ fn success_finish_last_run() {
 
     let user_deposit_amount: u128 = 1000000;
     let user_deposit_fees_amount: u128 = user_deposit_amount * FEE_BPS as u128 / MAX_BPS as u128;
-    let _user_deposit_amount_after_fees: u128 = user_deposit_amount - user_deposit_fees_amount;
+    let user_deposit_amount_after_fees: u128 = user_deposit_amount - user_deposit_fees_amount;
 
     let (horse_races_program, oracle_program, token_program) = get_programs(&sys);
     init_oracle(&oracle_program);
@@ -470,6 +470,8 @@ fn success_finish_last_run() {
     horses.insert(String::from("Pegasus"), Horse { max_speed: 50 });
     horses.insert(String::from("Max"), Horse { max_speed: 65 });
     horses.insert(String::from("Vitalik"), Horse { max_speed: 80 });
+
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
 
     let result = horse_races_program.send(
         MANAGER,
@@ -495,19 +497,26 @@ fn success_finish_last_run() {
     assert!(!result.main_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunProgressed(1).encode())));
 
-    let result = oracle_program.send(
-        MANAGER,
-        oracle_io::Action::UpdateValue {
-            id: 1,
-            value: 2141258129341892512471, // Max's victory seed
-        },
-    );
-    assert!(!result.main_failed());
-    assert!(!result.others_failed());
+    set_oracle_value(&oracle_program, 2, 2141258129341892512471);
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let result = horse_races_program.send(MANAGER, Action::FinishLastRun);
+    assert!(!result.main_failed());
+    assert!(result.contains(&(
+        MANAGER,
+        Event::LastRunFinished {
+            run_id: 1,
+            winner: (
+                String::from("Max"),
+                Horse { max_speed: 65 },
+                user_deposit_amount_after_fees
+            )
+        }
+        .encode()
+    )));
+
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => {
+        MetaResponse::Runs(runs) => {
             assert!(!runs.is_empty());
 
             let (id, run) = &runs[0];
@@ -564,6 +573,8 @@ fn success_withdraw_finished() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         USER,
         Action::Bid {
@@ -579,15 +590,10 @@ fn success_withdraw_finished() {
     assert!(!result.main_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunProgressed(1).encode())));
 
-    let result = oracle_program.send(
-        MANAGER,
-        oracle_io::Action::UpdateValue {
-            id: 1,
-            value: 2141258129341892512471, // Max's victory seed
-        },
-    );
+    set_oracle_value(&oracle_program, 2, 2141258129341892512471);
+
+    let result = horse_races_program.send(MANAGER, Action::FinishLastRun);
     assert!(!result.main_failed());
-    assert!(!result.others_failed());
 
     let result = horse_races_program.send(USER, Action::WithdrawFinished(1));
     assert!(!result.main_failed());
@@ -667,6 +673,8 @@ fn success_withdraw_finished_more_users() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         USER,
         Action::Bid {
@@ -703,9 +711,9 @@ fn success_withdraw_finished_more_users() {
     );
     assert!(!result.main_failed());
 
-    let meta_state: StateResponse = horse_races_program.meta_state(StateQuery::GetRuns).unwrap();
+    let meta_state: MetaResponse = horse_races_program.meta_state(MetaQuery::GetRuns).unwrap();
     match meta_state {
-        StateResponse::Runs(runs) => {
+        MetaResponse::Runs(runs) => {
             assert!(!runs.is_empty());
 
             let (id, run) = &runs[0];
@@ -754,15 +762,10 @@ fn success_withdraw_finished_more_users() {
     assert!(!result.main_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunProgressed(1).encode())));
 
-    let result = oracle_program.send(
-        MANAGER,
-        oracle_io::Action::UpdateValue {
-            id: 1,
-            value: 2141258129341892512471, // Max's victory seed
-        },
-    );
+    set_oracle_value(&oracle_program, 2, 2141258129341892512471);
+
+    let result = horse_races_program.send(MANAGER, Action::FinishLastRun);
     assert!(!result.main_failed());
-    assert!(!result.others_failed());
 
     let result = horse_races_program.send(USER, Action::WithdrawFinished(1));
     assert!(!result.main_failed());
@@ -850,6 +853,8 @@ fn success_withdraw_finished_more_winners() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         USER,
         Action::Bid {
@@ -892,15 +897,10 @@ fn success_withdraw_finished_more_winners() {
     assert!(!result.main_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunProgressed(1).encode())));
 
-    let result = oracle_program.send(
-        MANAGER,
-        oracle_io::Action::UpdateValue {
-            id: 1,
-            value: 2141258129341892512471, // Max's victory seed
-        },
-    );
+    set_oracle_value(&oracle_program, 2, 2141258129341892512471);
+
+    let result = horse_races_program.send(MANAGER, Action::FinishLastRun);
     assert!(!result.main_failed());
-    assert!(!result.others_failed());
 
     let result = horse_races_program.send(USER, Action::WithdrawFinished(1));
     assert!(!result.main_failed());
@@ -1010,6 +1010,8 @@ fn success_withdraw_finished_all_winners() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         USER,
         Action::Bid {
@@ -1052,15 +1054,10 @@ fn success_withdraw_finished_all_winners() {
     assert!(!result.main_failed());
     assert!(result.contains(&(MANAGER, Event::LastRunProgressed(1).encode())));
 
-    let result = oracle_program.send(
-        MANAGER,
-        oracle_io::Action::UpdateValue {
-            id: 1,
-            value: 2141258129341892512471, // Max's victory seed
-        },
-    );
+    set_oracle_value(&oracle_program, 2, 2141258129341892512471);
+
+    let result = horse_races_program.send(MANAGER, Action::FinishLastRun);
     assert!(!result.main_failed());
-    assert!(!result.others_failed());
 
     let result = horse_races_program.send(USER, Action::WithdrawFinished(1));
     assert!(!result.main_failed());
@@ -1213,6 +1210,8 @@ fn fail_create_run_not_manager() {
     horses.insert(String::from("Max"), Horse { max_speed: 65 });
     horses.insert(String::from("Vitalik"), Horse { max_speed: 80 });
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         FAKE_MANAGER,
         Action::CreateRun {
@@ -1255,6 +1254,8 @@ fn fail_create_run_last_run_not_ended() {
         },
     );
     assert!(!result.main_failed());
+
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
 
     let result = horse_races_program.send(
         MANAGER,
@@ -1306,6 +1307,8 @@ fn fail_bid_manager() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         MANAGER,
         Action::Bid {
@@ -1354,6 +1357,8 @@ fn fail_bid_last_run_not_bidding() {
         },
     );
     assert!(!result.main_failed());
+
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
 
     sys.spend_blocks(1);
 
@@ -1405,6 +1410,8 @@ fn fail_cancel_last_run_not_manager() {
         },
     );
     assert!(!result.main_failed());
+
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
 
     let result = horse_races_program.send(
         USER,
@@ -1460,6 +1467,8 @@ fn fail_cancel_last_run_bidding_not_finished() {
     );
     assert!(!result.main_failed());
 
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
+
     let result = horse_races_program.send(
         USER,
         Action::Bid {
@@ -1511,6 +1520,8 @@ fn fail_withdraw_finished_not_finished() {
         },
     );
     assert!(!result.main_failed());
+
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
 
     let result = horse_races_program.send(
         USER,
@@ -1569,6 +1580,8 @@ fn fail_withdraw_canceled_not_canceled() {
         },
     );
     assert!(!result.main_failed());
+
+    set_oracle_value(&oracle_program, 1, 2141258129341892512471);
 
     let result = horse_races_program.send(
         USER,

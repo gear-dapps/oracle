@@ -1,15 +1,16 @@
-[package]
-name = "app"
-version = "0.1.0"
-edition = "2021"
-license = "MIT"
-authors = ["Gear Technologies"]
+[workspace]
+resolver = "2"
+members = [
+    "oracle",
+    "randomness-oracle",
+    "randomness-oracle-io",
+    "io",
+    "roll-dice-example",
+    "horse-races"
+]
 
-[dependencies]
-gstd = { git = "https://github.com/gear-tech/gear.git", features = ["debug"] }
-
-[dev-dependencies]
-gtest = { git = "https://github.com/gear-tech/gear.git" }
-
-[build-dependencies]
-gear-wasm-builder = { git = "https://github.com/gear-tech/gear.git" }
+[patch.'https://github.com/gear-tech/gear.git']
+gtest = { git = "https://github.com/gear-dapps/gear.git",  rev = "6471eb93" }
+gear-wasm-builder = { git = "https://github.com/gear-dapps/gear.git",  rev = "6471eb93" }
+gcore = { git = "https://github.com/gear-dapps/gear.git", features = ["debug"], rev = "6471eb93" }
+gstd = { git = "https://github.com/gear-dapps/gear.git", features = ["debug"], rev = "6471eb93" }

@@ -1,4 +1,8 @@
 .binpath
 .DS_Store
 .vscode
+keypair.json
+node_modules/
+dist/
 target/
+.env

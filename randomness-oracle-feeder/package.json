@@ -1,5 +1,5 @@
 {
-  "name": "randomness-oracle-producer",
+  "name": "randomness-oracle-feeder",
   "version": "0.1.0",
   "description": "Randomness off-chain relay",
   "main": "index.ts",
@@ -17,10 +17,9 @@
     "typescript": "^4.8.4"
   },
   "dependencies": {
-    "@gear-js/api": "^0.25.9",
-    "@polkadot/api": "^9.4.3",
-    "@polkadot/api-augment": "^9.4.3",
-    "@polkadot/keyring": "^10.1.10",
+    "@gear-js/api": "0.26.1",
+    "@polkadot/api": "9.5.1",
+    "@polkadot/keyring": "9.5.1",
     "dotenv": "^16.0.3",
     "isomorphic-unfetch": "^3.1.0"
   }
